@@ -89,17 +89,6 @@ Projects are the logical construct that integrate Calm with Nutanix's native Sel
 
   Click `here <https://portal.nutanix.com/#/page/docs/details?targetId=Nutanix-Calm-Admin-Operations-Guide-v56:nuc-roles-responsibility-matrix-c.html>`_ to view the complete matrix of default SSP roles and associated permissions.
 
-
-#. Under **AHV Cluster** verify your assigned cluster is selected from the drop-down list, otherwise select it.
-
-   .. figure:: images/project1.png
-
-#. Under **Network**, verify the **Primary** and **Secondary** networks are selected and the **Primary** network is the default. Otherwise, make the selections as shown below.
-
-   .. figure:: images/project2.png
-
-#. If changes were made, click **Save**.
-
 Creating the Blueprint
 ++++++++++++++++++++++
 
