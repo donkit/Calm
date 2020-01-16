@@ -10,15 +10,16 @@
 .. _calm_win:
 
 -----------------------
-Calm: Windows Application Workloads
+Calm: Windows AD
 -----------------------
-
-*The estimated time to complete this lab is 60 minutes.*
 
 Overview
 ++++++++
 
-**In this exercise you will explore the basics of working with Windows workloads in Nutanix Calm by building and deploying a blueprint that installs and configures a multi-tier** `bug tracker <http://bugnetproject.com/documentation/>`_ **web app using Microsoft SQL Server database & IIS webserver. This lab assumes you are familiar with basic Calm functionality
+.. note::
+   *The estimated time to complete this lab is **45** minutes.*
+   In this exercise you will create a Nutanix Calm Blueprint based on a Microsoft Windows 10 image. The image will be sysprepped with an unattended XML answer file, and then will be added to a Domain via a Powershell script. We’ll also add a script to remove the computer from the Domain upon deletion.
+
 
 Verifying the Default Project
 +++++++++++++++++++++++++++++
@@ -98,11 +99,10 @@ Creating the Blueprint
 
 #. Within Calm, create a new **Multi VM/Pod Blueprint**.
 
-#. Fill out the following fields and click **Proceed** to launch the Blueprint Editor:
+#. Specify **Windows-<INITIALS>** in the Blueprint **Name** field. Enter a Description **Win10 added to AD**
 
-   - **Name** - *Initials*-CalmWindowsIntro
-   - **Description** - [BugNET](\http://@@{MSIIS.address}@@/bugnet)
-   - **Project** - *Initials-Calm*
+#. Select *initals*-Calm from the Project drop down menu and click Proceed.
+
 
    .. note::
 
@@ -110,448 +110,332 @@ Creating the Blueprint
 
 #. Click **Credentials** and create the following two credentials:
 
+.. Note::
+  You’ll likely notice that both credentials have the same username and password. For this reason, we technically could use a single credential. However, in the real world it is extremely unlikely (and unwise) that both your User VMs and your Domain credentials are the exact same. For that reason, we’ll leave them seperate to make this Blueprint more portable.
+
    +---------------------+---------------------+---------------------+
-   | **Credential Name** | WIN_VM_CRED         | SQL_CRED            |
+   | **Credential Name** | WIN_VM_CRED         | DOMAIN_CRED            |
    +---------------------+---------------------+---------------------+
    | **Username**        | Administrator       | Administrator       |
    +---------------------+---------------------+---------------------+
    | **Secret Type**     | Password            | Password            |
    +---------------------+---------------------+---------------------+
-   | **Password**        | nutanix/4u          | Str0ngSQL/4u$       |
+   | **Password**        | nutanix/4u          | nutanix/4u      |
    +---------------------+---------------------+---------------------+
 
-   .. figure:: images/credentials.png
+   .. figure:: images/windows1.png
 
 #. Click **Save** and return **Back** to the Blueprint Editor.
 
+**Setting Variables**
+
+Variables improve the extensibility of Blueprints. For this Blueprint, we’ll want to define the domain name that the Windows VM will join to, and the IP of the Active Directory server. We’ll leave the **Secret** variables **un-checked**.
+
+
 #. Using the **Default** Application Profile, specify the following **Variables** in the **Configuration Panel**:
 
-   +----------------+----------------+------------------+------------------+------------------+
-   | **Name**       |**Data Type**   | **Value**        | **Secret**       | **Runtime**      |
-   +================+================+==================+=====================================+
-   | DbName         | String         | BugNET           | No               | Yes              |
-   +----------------+----------------+------------------+-------------------------------------+
-   | DbUsername     | String         | BugNETUser       | No               | Yes              |
-   +----------------+----------------+------------------+-------------------------------------+
-   | DbPassword     | String         | Nutanix/4u$      | Yes              | Yes              |
-   +----------------+----------------+------------------+------------------+------------------+
-   | User_initials  | String         |*Leave blank*     | No               | Yes              |
-   +----------------+----------------+------------------+------------------+------------------+
+   +-------------------+----------------+
+   | **Variable Name** |  **Value**     |
+   +===================+================+
+   | Domain Name       |  ntnxlab.local |
+   +----------------+-------------------+
+   | AD_IP             |  (10.42.xx.51) |
+   +-------------------+----------------+--
 
-   .. figure:: images/variables.png
+   .. figure:: images/windows2.png
 
 #. Click **Save**.
 
-Adding Services
-+++++++++++++++
-
-#. Under **Application Overview > Services**, click :fa:`plus-circle` twice to add two new Services.
-
-   .. figure:: images/create_service.png
-
-#. Use the table below to complete the **VM** fields for each service:
-
-   +------------------------------+---------------------------+---------------------------+
-   | **Service Name**             | **MSSQL**                 | **MSIIS**                 |
-   +------------------------------+---------------------------+---------------------------+
-   | **Name**                     | MSSQL2014                 | MSIIS8                    |
-   +------------------------------+---------------------------+---------------------------+
-   | **Cloud**                    | Nutanix                   | Nutanix                   |
-   +------------------------------+---------------------------+---------------------------+
-   | **Operating System**         | Windows                   | Windows                   |
-   +------------------------------+---------------------------+---------------------------+
-   | **VM Name**                  | @@{User_initials}@@-MSSQL | @@{User_initials}@@-MSIIS |
-   +------------------------------+---------------------------+---------------------------+
-   | **vCPUs**                    | 2                         | 2                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **Cores per vCPU**           | 2                         | 2                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **Memory (GiB)**             | 6                         | 6                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **Guest Customization**      | Yes                       | Yes                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Type**                     | Sysprep                   | Sysprep                   |
-   +------------------------------+---------------------------+---------------------------+
-   | **Install Type**             | Prepared                  | Prepared                  |
-   +------------------------------+---------------------------+---------------------------+
-   | **Script**                   | *Copy script below table* | *Copy script below table* |
-   +------------------------------+---------------------------+---------------------------+
-   | **Disk**                     | 1                         | 1                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **Type**                     | DISK                      | DISK                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Bus Type**                 | SCSI                      | SCSI                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Operation**                | Clone from Image Service  |   Clone from Image Service|
-   +------------------------------+---------------------------+---------------------------+
-   | **Image**                    | Windows2012R2             | Windows2012R2             |
-   +------------------------------+---------------------------+---------------------------+
-   | **Bootable 1**               | Yes                       | Yes                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Additional Disks**         | 1                         | 1                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **Type**                     | DISK                      | DISK                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Bus Type**                 | SCSI                      | SCSI                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Operation**                | Allocate on Storage Cont  | Allocate on Storage Cont  |
-   +------------------------------+---------------------------+---------------------------+
-   | **Size (GiB)**               | 100                       | 100                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Disks (3)**                | 1                         | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Type**                     | CD-ROM                    | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Bus Type**                 | IDE                       | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Operation**                | Clone from Image Service  | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Image**                    | MSSQL2014_ISO             | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Bootable 2**               | No                        | N/A                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **VGPUs**                    | None                      | None                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Categories**               | None                      | None                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Network Adapters**         | 1                         | 1                         |
-   +------------------------------+---------------------------+---------------------------+
-   | **NIC 1**                    | Primary                   | Primary                   |
-   +------------------------------+---------------------------+---------------------------+
-   | **Check log-in upon create** | Yes                       | Yes                       |
-   +------------------------------+---------------------------+---------------------------+
-   | **Credential**               | WIN_VM_CRED               | WIN_VM_CRED               |
-   +------------------------------+---------------------------+---------------------------+
-   | **Address**                  | NIC 1                     | NIC 1                     |
-   +------------------------------+---------------------------+---------------------------+
-   | **Connection Type**          | Windows (Powershell)      | Windows (Powershell)      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Connection Port**          | 5985                      | 5985                      |
-   +------------------------------+---------------------------+---------------------------+
-   | **Delay (in seconds)**       | Increase to **90**        | Increase to **90**        |
-   +------------------------------+---------------------------+---------------------------+
-
-   .. code-block:: XML
-     :caption: Sysprep Script
-
-     <?xml version="1.0" encoding="UTF-8"?>
-     <unattend xmlns="urn:schemas-microsoft-com:unattend">
-       <settings pass="specialize">
-          <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-             <ComputerName>@@{name}@@</ComputerName>
-             <RegisteredOrganization>Nutanix</RegisteredOrganization>
-             <RegisteredOwner>Acropolis</RegisteredOwner>
-             <TimeZone>UTC</TimeZone>
-          </component>
-          <component xmlns="" name="Microsoft-Windows-TerminalServices-LocalSessionManager" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
-             <fDenyTSConnections>false</fDenyTSConnections>
-          </component>
-          <component xmlns="" name="Microsoft-Windows-TerminalServices-RDP-WinStationExtensions" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
-             <UserAuthentication>0</UserAuthentication>
-          </component>
-          <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Networking-MPSSVC-Svc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-             <FirewallGroups>
-                <FirewallGroup wcm:action="add" wcm:keyValue="RemoteDesktop">
-                   <Active>true</Active>
-                   <Profile>all</Profile>
-                   <Group>@FirewallAPI.dll,-28752</Group>
-                </FirewallGroup>
-             </FirewallGroups>
-          </component>
-       </settings>
-       <settings pass="oobeSystem">
-          <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-             <UserAccounts>
-                <AdministratorPassword>
-                   <Value>@@{WIN_VM_CRED.secret}@@</Value>
-                   <PlainText>true</PlainText>
-                </AdministratorPassword>
-             </UserAccounts>
-             <AutoLogon>
-                <Password>
-                   <Value>@@{WIN_VM_CRED.secret}@@</Value>
-                   <PlainText>true</PlainText>
-                </Password>
-                <Enabled>true</Enabled>
-                <Username>Administrator</Username>
-             </AutoLogon>
-             <FirstLogonCommands>
-                <SynchronousCommand wcm:action="add">
-                   <CommandLine>cmd.exe /c netsh firewall add portopening TCP 5985 "Port 5985"</CommandLine>
-                   <Description>Win RM port open</Description>
-                   <Order>1</Order>
-                   <RequiresUserInput>true</RequiresUserInput>
-                </SynchronousCommand>
-                <SynchronousCommand wcm:action="add">
-                   <CommandLine>powershell -Command "Enable-PSRemoting -SkipNetworkProfileCheck -Force"</CommandLine>
-                   <Description>Enable PS-Remoting</Description>
-                   <Order>2</Order>
-                   <RequiresUserInput>true</RequiresUserInput>
-                </SynchronousCommand>
-                <SynchronousCommand wcm:action="add">
-                   <CommandLine>powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned"</CommandLine>
-                   <Description>Enable Remote-Signing</Description>
-                   <Order>3</Order>
-                   <RequiresUserInput>false</RequiresUserInput>
-                </SynchronousCommand>
-             </FirstLogonCommands>
-             <OOBE>
-                <HideEULAPage>true</HideEULAPage>
-                <SkipMachineOOBE>true</SkipMachineOOBE>
-             </OOBE>
-          </component>
-          <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-             <InputLocale>en-US</InputLocale>
-             <SystemLocale>en-US</SystemLocale>
-             <UILanguageFallback>en-us</UILanguageFallback>
-             <UILanguage>en-US</UILanguage>
-                <UserLocale>en-US</UserLocale>
-          </component>
-       </settings>
-     </unattend>
-
-   Take a minute to review the Sysprep script. You can see the VMs being configured to autologon to the local Administrator account using the WIN_VM_CRED password. While this exercise will not join the VMs to an Active Directory domain, you could use either Sysprep or a Package Install task script to automate the joining of a domain.
-
-   Additionally, the firewall is configured to allow port 5985 which Calm uses to execute PowerShell scripts against the host. For those familiar with previous versions of Calm, the **Karan** service VM is no longer required to proxy PowerShell commands to the service VMs. Instead, Calm has introduced native support for running PowerShell scripts on remote hosts.
-
-   Similar to the Task Manager application in the :ref:`calm_linux` lab, you want to ensure the database is available prior to the IIS web server setup.
-
-#. In the Blueprint Editor, select the **MSIIS** service and create a dependency on the **MSSQL** service.
-
-   .. figure:: images/Depend.png
-   .. figure:: images/services.png
-
-Defining Package Install
-++++++++++++++++++++++++
-
-For **each** of the following 7 scripts (3 for MSSSQL and 4 for MSIIS), the **Type**, **Script Type**, and **Credential** fields will be the same:
-
-- **Type** - Execute
-- **Script Type** - PowerShell
-- **Credential** - WIN_VM_CRED
-
-.. note::
-
-  If you were working with domain joined VMs, you would require a separate domain credential to execute PowerShell scripts following the VM being joined to the domain.
-
-#. Select the **MSSQL** service and open the **Package** tab in the **Configuration Panel**.
-
-#. Name the package and click **Configure install** to begin adding installation tasks.
-
-   You will add multiple scripts to complete each installation. Working with multiple scripts allows for easier maintenance and application of code across multiple services or blueprints using the Calm **Task Library**. The Task Library allows you to create modularized scripts to achieve certain common functions such as joining a domain or configuring common OS settings.
-
-#. Under **MSSQL > Package Install**, click **+ Task** and fill out the following fields:
-
-   - **Task Name** - InitializeDisk1
-   - **Type** - Execute
-   - **Script Type** - PowerShell
-   - **Credential** - WIN_VM_CRED
-   - **Script** -
-
-   .. code-block:: powershell
-
-     Get-Disk -Number 1 | Initialize-Disk -ErrorAction SilentlyContinue
-     New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter -ErrorAction SilentlyContinue | Format-Volume -Confirm:$false
-
-   The above script simply performs an initialization and format of the extra 100GB VDisk added during VM configuration of the service.
-
-#. Click **Publish To Library > Publish** to save this task script to the Task Library for future use.
-
-#. Repeat clicking **+ Task** to add the remaining two scripts:
-
-   - **Task Name** - InstallMSSQL
-   - **Script** -
-
-   .. code-block:: powershell
-
-     $DriveLetter = $(Get-Partition -DiskNumber 1 -PartitionNumber 2 | select DriveLetter -ExpandProperty DriveLetter)
-     $edition = "Standard"
-     $HOSTNAME=$(hostname)
-     $PackageName = "MsSqlServer2014Standard"
-     $Prerequisites = "Net-Framework-Core"
-     $silentArgs = "/IACCEPTSQLSERVERLICENSETERMS /Q /ACTION=install /FEATURES=SQLENGINE,SSMS,ADV_SSMS,CONN,IS,BC,SDK,BOL /SECURITYMODE=sql /SAPWD=`"@@{SQL_CRED.secret}@@`" /ASSYSADMINACCOUNTS=`"@@{SQL_CRED.username}@@`" /SQLSYSADMINACCOUNTS=`"@@{SQL_CRED.username}@@`" /INSTANCEID=MSSQLSERVER /INSTANCENAME=MSSQLSERVER /UPDATEENABLED=False /INDICATEPROGRESS /TCPENABLED=1 /INSTALLSQLDATADIR=`"${DriveLetter}:\Microsoft SQL Server`""
-     $setupDriveLetter = "D:"
-     $setupPath = "$setupDriveLetter\setup.exe"
-     $validExitCodes = @(0)
-
-     if ($Prerequisites){
-     Install-WindowsFeature -IncludeAllSubFeature -ErrorAction Stop $Prerequisites
-     }
-
-     Write-Output "Installing $PackageName...."
-
-     $install = Start-Process -FilePath $setupPath -ArgumentList $silentArgs -Wait -NoNewWindow -PassThru
-     $install.WaitForExit()
-
-     $exitCode = $install.ExitCode
-     $install.Dispose()
-
-     Write-Output "Command [`"$setupPath`" $silentArgs] exited with `'$exitCode`'."
-     if ($validExitCodes -notcontains $exitCode) {
-     Write-Output "Running [`"$setupPath`" $silentArgs] was not successful. Exit code was '$exitCode'. See log for possible error messages."
-     exit 1
-     }
-
-   Reviewing the above script you can see it is performing an automated installation of SQL Server, using the SQL_CRED credential details and using the extra 100GB VDisk for the SQL data files.
-
-   According to Nutanix best practices for production database deployments, what else would need to be added to the VM/installation?
-
-   - **Task Name** - FirewallRules
-   - **Script** -
-
-   .. code-block:: powershell
-
-     New-NetFirewallRule -DisplayName "SQL Server" -Direction Inbound -Protocol TCP -LocalPort 1433 -Action allow
-     New-NetFirewallRule -DisplayName "SQL Admin Connection" -Direction Inbound -Protocol TCP -LocalPort 1434 -Action allow
-     New-NetFirewallRule -DisplayName "SQL Database Management" -Direction Inbound -Protocol UDP -LocalPort 1434 -Action allow
-     New-NetFirewallRule -DisplayName "SQL Service Broker" -Direction Inbound -Protocol TCP -LocalPort 4022 -Action allow
-     New-NetFirewallRule -DisplayName "SQL Debugger/RPC" -Direction Inbound -Protocol TCP -LocalPort 135 -Action allow
-     New-NetFirewallRule -DisplayName "SQL Browser" -Direction Inbound -Protocol TCP -LocalPort 2382 -Action allow
-
-   Reviewing the above script you can see it is allowing inbound access through the Windows Firewall for key SQL services.
-
-   Once complete, your MSSQL service should look like this:
-
-   .. figure:: images/mssql_package_install.png
-
-#. Select the **MSIIS** service and open the **Package** tab in the **Configuration Panel**.
-
-#. Name the package and click **Configure install** to begin adding installation tasks.
-
-#. Under **MSSQL > Package Install**, click **+ Task**.
-
-#. Similar to the first step of the MSSQL service installation, you will need to initialize and format the additional 100GB VDisk. Rather than manually specifying the same script for this task, click **Browse Library**.
-
-#. Select the **InitializeDisk1** task you had previously published and click **Select > Copy**.
-
-   .. figure:: images/task_library.png
-
-   .. note::
-
-     The Task Library also gives you the ability to provide variable definitions if there are Calm macros present in the published task.
-
-#. Specify the **Name** and **Credential**, then repeat clicking **+ Task** to add the remaining three scripts:
-
-   - **Task Name** - InstallWebPI
-   - **Script** -
-
-   .. code-block:: powershell
-
-     # Install WPI
-     New-Item c:/msi -Type Directory
-     Invoke-WebRequest 'http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi' -OutFile c:/msi/WebPlatformInstaller_amd64_en-US.msi
-     Start-Process 'c:/msi/WebPlatformInstaller_amd64_en-US.msi' '/qn' -PassThru | Wait-Process
-     cd 'C:/Program Files/Microsoft/Web Platform Installer'; .\WebpiCmd.exe /Install /Products:'UrlRewrite2,ARRv3_0' /AcceptEULA /Log:c:/msi/WebpiCmd.log
-
-   The above script installs the Microsoft Web Platform Installer (WebPI), which is used to download, install, and update components of the Microsoft Web Platform, including Internet Information Services (IIS), IIS Media Platform technologies, SQL Server Express, .NET Framework, and Visual Web Developer.
-
-   - **Task Name** - InstallNetFeatures
-   - **Script** -
-
-   .. code-block:: powershell
-
-     # Enable Repair via Windows Update
-     $servicing = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\Servicing"
-     New-Item -Path $servicing -Force
-     Set-ItemProperty -Path $servicing -Name RepairContentServerSource -Value 2
-
-     # Install Features
-     Install-WindowsFeature -Name NET-Framework-Core
-     Install-WindowsFeature -Name NET-WCF-Services45 -IncludeAllSubFeature
-
-   The above script installs .NET Framework 4.5 on the VM.
-
-   - **Task Name** - InstallBugNetApp
-   - **Script** -
-
-   .. code-block:: powershell
-
-     # Create the installation configuration file
-     $configFile = "AppPath[@]Default Web Site/bugnet
-     DbServer[@]@@{MSSQL.address}@@
-     DbName[@]@@{DbName}@@
-     DbUsername[@]@@{DbUsername}@@
-     Database Password[@]@@{DbPassword}@@
-     DbAdminUsername[@]sa
-     DbAdminPassword[@]@@{SQL_CRED.secret}@@"
-
-     echo $configFile >> BugNET0.app
-
-     # Install the application via Web PI
-     WebpiCmd-x64.exe /Install /UseRemoteDatabase /Application:BugNET@BugNET0.app /AcceptEula
-
-   The above script uses the Application Profile variables you defined at the beginning of the exercise to populate the configuration file of the Bug Tracker app. It then leverages WebPI to install the application from the `Microsoft Web App Gallery <https://webgallery.microsoft.com/gallery>`_. With minimal changes, you could leverage many popular applications from the Gallery, including apps for CMS, eCommerce, Wiki, ticketing, and more.
-
-   Once complete, your MSIIS service should look like this:
-
-   .. figure:: images/msiis_package_install.png
-
-#. Click **Save**.
-
-Launching the Blueprint
+Adding Windows Services
 +++++++++++++++++++++++
 
-#. From the upper toolbar in the Blueprint Editor, click **Launch**.
+#. Navigate to **Virtual Infrastructure** click **Images**, click **Add Images**. Select **URL** as Image resource, fill out download address https://s3.amazonaws.com/get-ahv-images/Windows10-1709.qcow2 and click **Upload file** , **Next** and **Save**.
 
-#. Specify a unique **Application Name** (e.g. *Initials*\ -BugNET) and your **User_initials** Runtime variable value for VM naming.
+   .. figure:: images/windows3.png
 
-#. Click **Create**.
+#. After uploading successfully, go back to Calm page and select **Blueprints** from the sidebar and click your **Windows-<INITIALS>** Blueprint to open the Blueprint Editor.
 
-   The **Audit** tab can be used to monitor the deployment of the application. The application should take approximately 20 minutes to deploy.
+#. In **Application Overview** > **Services**, click :fa:`plus-circle`
 
-#. Once the Create action completes, and the application is in a **Running** state, open the **BugNET** link in a new tab.
+#. Note that **Service1** appears in the **Workspace** and the **Configuration Pane** reflects the configuration of the selected Service.
 
-   .. figure:: images/bugnet_link.png
+  .. figure:: images/windows21.png
 
-#. You'll be presented with an **Installation Status Report** page.  Wait for it to report **Installation Complete**, and then click the link at the bottom to access the application.
+  Fill out the following fields on the right side:
 
-   .. figure:: images/bugnet_setup.png
+      **Service Name** - Windows10
+      **Name** - Windows10_AHV
+      **Cloud** - Nutanix
+      **OS** - Windows
+      **VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
+      **Image** - Windows10
+      **Type** - Disk
+      **Bus Type** - SCSI
+      Select **Bootable**
+      **vCPUs** - 2
+      **Cores per vCPU** - 1
+      **Memory (GiB)** - 4
+      Select **Guest Customization**
+      Type - **Sysprep**
+      Install Type - **Prepared**
+      **Script** - Paste in the following Unattended XML:
 
-   Congratulations! You now have a fully functional bug tracking application automatically provisioned leveraging Microsoft SQL Server and IIS.
+      .. code-block:: XML
+        :caption: Sysprep Script
 
-   .. figure:: images/bugnet_app.png
+        <?xml version="1.0" encoding="UTF-8"?>
+  <unattend xmlns="urn:schemas-microsoft-com:unattend">
+     <settings pass="specialize">
+        <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+           <ComputerName>Win-@@{calm_unique}@@</ComputerName>
+           <RegisteredOrganization>Nutanix</RegisteredOrganization>
+           <RegisteredOwner>Acropolis</RegisteredOwner>
+           <TimeZone>UTC</TimeZone>
+        </component>
+        <component xmlns="" name="Microsoft-Windows-TerminalServices-LocalSessionManager" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
+           <fDenyTSConnections>false</fDenyTSConnections>
+        </component>
+        <component xmlns="" name="Microsoft-Windows-TerminalServices-RDP-WinStationExtensions" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
+           <UserAuthentication>0</UserAuthentication>
+        </component>
+        <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Networking-MPSSVC-Svc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+           <FirewallGroups>
+              <FirewallGroup wcm:action="add" wcm:keyValue="RemoteDesktop">
+                 <Active>true</Active>
+                 <Profile>all</Profile>
+                 <Group>@FirewallAPI.dll,-28752</Group>
+              </FirewallGroup>
+           </FirewallGroups>
+        </component>
+     </settings>
+     <settings pass="oobeSystem">
+        <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+           <UserAccounts>
+              <AdministratorPassword>
+                 <Value>@@{WIN_VM_CRED.secret}@@</Value>
+                 <PlainText>true</PlainText>
+              </AdministratorPassword>
+           </UserAccounts>
+           <AutoLogon>
+              <Password>
+                 <Value>@@{WIN_VM_CRED.secret}@@</Value>
+                 <PlainText>true</PlainText>
+              </Password>
+              <Enabled>true</Enabled>
+              <Username>Administrator</Username>
+           </AutoLogon>
+           <FirstLogonCommands>
+              <SynchronousCommand wcm:action="add">
+                 <CommandLine>cmd.exe /c netsh firewall add portopening TCP 5985 "Port 5985"</CommandLine>
+                 <Description>Win RM port open</Description>
+                 <Order>1</Order>
+                 <RequiresUserInput>true</RequiresUserInput>
+              </SynchronousCommand>
+              <SynchronousCommand wcm:action="add">
+                 <CommandLine>powershell -Command "Enable-PSRemoting -SkipNetworkProfileCheck -Force"</CommandLine>
+                 <Description>Enable PS-Remoting</Description>
+                 <Order>2</Order>
+                 <RequiresUserInput>true</RequiresUserInput>
+              </SynchronousCommand>
+              <SynchronousCommand wcm:action="add">
+                 <CommandLine>powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned"</CommandLine>
+                 <Description>Enable Remote-Signing</Description>
+                 <Order>3</Order>
+                 <RequiresUserInput>false</RequiresUserInput>
+              </SynchronousCommand>
+           </FirstLogonCommands>
+           <OOBE>
+              <HideEULAPage>true</HideEULAPage>
+              <SkipMachineOOBE>true</SkipMachineOOBE>
+           </OOBE>
+        </component>
+        <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+           <InputLocale>en-US</InputLocale>
+           <SystemLocale>en-US</SystemLocale>
+           <UILanguageFallback>en-us</UILanguageFallback>
+           <UILanguage>en-US</UILanguage>
+           <UserLocale>en-US</UserLocale>
+        </component>
+     </settings>
+  </unattend>
 
-(Optional) Scale Out IIS Tier
-+++++++++++++++++++++++++++++
+.. note::
+  This Unattended XML answer file will set some basic computer information such as hostname and organization, configure the Administrator password to our WIN_VM_CRED secret, open Powershell port 5985 in the firewall, and enable remote Powershell functionality.
 
-Leveraging the same approach from the :ref:`calm_linux` lab of having multiple web server replicas, can you add a CentOS based HAProxy service to this blueprint to allow for load balancing across multiple IIS servers?
+  .. figure:: images/Guest.png
 
-(Optional) Managing MSSQL with Era
-++++++++++++++++++++++++++++++++++
+Select :fa:`plus-circle` under **Network Adapters(NICs)**
 
-Complete the :ref:`era` lab to gain a basic understanding of Era's capabilities and operation.
+Select **primary**
 
-Log into your BugNET application with the default credentials (**admin/password**) and follow the wizard to create a new project.
+**Credential** -  Select WIN_VM_CRED and leave the rest of the fields as default
 
-You have just deployed your production BugNET application and now desire to rapidly deploy multiple dev/test instances using the latest available production data.
+  .. figure:: images/credential.png
 
-Can you build a version of this Blueprint that leverages an Era clone of your SQL Server database?
+Click **Save** and ensure no errors or warnings pop-up. If they do, resolve the issue, and **Save** again.
 
-**Hints**
+*Package Install*
 
-- Clone your existing blueprint first!
-- When registering the SQL Server source database in Era, this deployment uses the default MSSQLServer instance name. You can use Windows Authentication to access the SQL Server instance, using the WIN_VM_CRED credentials.
-- When adding services in Calm, one of the **Cloud** types is using an **Existing VM**. Existing VMs only require the IP address of the VM and a credential for login.
-- When cloning, the Windows License Key for the Windows Server 2012 R2 VM is ``W3GGN-FT8W3-Y4M27-J84CP-Q3VJ9``.
-- You could use a semi-automated approach wherein you have a **Runtime** variable for your cloned database IP. In this instance, you would create a clone of your source database, wait for it to return an IP address, and provision the blueprint with the IP specified at runtime.
-- You could use a fully automated approach wherein you create a **Package Install Task** for your **Existing VM**. That task could execute an `EScript <https://portal.nutanix.com/#/page/docs/details?targetId=Nutanix-Calm-Admin-Operations-Guide-v240:nuc-supported-escript-modules-functions-c.html#nconcept_uxr_5dj_5bb>`_ to perform an API call to Era to initiate the DB clone operation and return the IP address.
-- Don't forget about dependencies!
+With the Windows10 service icon selected in the workspace window, scroll to the top of the **Configuration Panel**, click **Package**. Name the Package as **WIN_PACKAGE**, and then click the **Configure install** button.
+
+On the Blueprint Canvas section, a **Package Install** field will pop up next to the Windows10 Service tile:
+
+Click on the + Task button, and fill out the following fields on the Configuration Panel on the right:
+
+.. figure:: images/package.png
+
+Click on the + **Task** button, and fill out the following fields on the **Configuration Panel** on the right:
+
+**Name Task** - JoinDomain
+**Type** - execute
+**Script Type** - Powershell
+**Credential - WIN_VM_CRED
+
+.. figure:: images/package.png
+
+Copy and paste the following script into the **Script** field:
+
+.. code-block:: powershell
+
+$HOSTNAME = "Win-@@{calm_unique}@@"
+
+function Set-Hostname{
+  [CmdletBinding()]
+  Param(
+      [parameter(Mandatory=$true)]
+      [string]$Hostname
+)
+  if ($Hostname -eq  $(hostname)){
+    Write-Host "Hostname already set."
+  } else{
+    Rename-Computer -NewName $HOSTNAME -ErrorAction Stop
+  }
+}
+
+function JointoDomain {
+  [CmdletBinding()]
+  Param(
+      [parameter(Mandatory=$true)]
+      [string]$DomainName,
+      [parameter(Mandatory=$false)]
+      [string]$OU,
+      [parameter(Mandatory=$true)]
+      [string]$Username,
+      [parameter(Mandatory=$true)]
+      [string]$Password,
+      [parameter(Mandatory=$true)]
+      [string]$Server
+  )
+  $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
+  $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
+
+  if ($env:computername  -eq $env:userdomain) {
+    Write-Host "Not in domain"
+    $adminname = "$DomainName\$Username"
+    $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
+    Write-Host "$adminname , $password"
+    $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
+    Add-computer -DomainName $DomainName -Credential $credential -force -Options JoinWithNewName,AccountCreate -PassThru -ErrorAction Stop
+  } else {
+     Write-Host "Already in domain"
+  }
+}
+
+if ($HOSTNAME -ne $Null){
+  Write-Host "Setting Hostname"
+  Set-Hostname -Hostname $HOSTNAME
+}
+
+JointoDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@" -Server "@@{AD_IP}@@"
+
+Restart-Computer -Force -AsJob
+exit 0
+
+ .. Note::
+   Looking at the script you can see a function that sets the VM’s hostname if it is not already set, a function that joins the computer to the domain specified via our macro and credentials that we set earlier, and finally restarts the user VM so the domain join takes affect.
+
+*Package Uninstall*
+
+.. figure:: images/package.png
+
+
+    **Click** - Configure Uninstall
+    **Click** - + Task
+    **Name Task** - RemoveDomain
+    Type - **Execute**
+    Script Type - **Powershell**
+    **Credential** - WIN_VM_CRED
+
+    Copy and paste the following script into the **Script** field:
+
+    .. code-block:: powershell
+
+    $HOSTNAME = "Win-@@{calm_unique}@@"
+
+function RemoveFromDomain {
+  [CmdletBinding()]
+  Param(
+      [parameter(Mandatory=$true)]
+      [string]$DomainName,
+      [parameter(Mandatory=$false)]
+      [string]$OU,
+      [parameter(Mandatory=$true)]
+      [string]$Username,
+      [parameter(Mandatory=$true)]
+      [string]$Password,
+  )
+  $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
+  $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
+
+  $adminname = "$DomainName\$Username"
+  $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
+  Write-Host "$adminname , $password"
+  $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
+  Remove-computer -UnjoinDomaincredential $credential -PassThru -Verbose -Force
+  Write-Host "Removed from domain @@{DOMAIN}@@"
+}
+
+RemoveFromDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@"
+
+ .. Note::
+   This script contains a function which removes the computer from the domain, utilizing the DOMAIN_CRED credentials that we defined earlier.
+
+Click **Save**. You will be prompted with specific errors if there are validation issues such as missing fields or unacceptable characters.
+
+Blueprint Launch and Verification
++++++++++++++++++++++++++++++++++
+
++Launching the Blueprint+
+
+From the toolbar at the top of the Blueprint Editor, click **Launch**.
+
+In the **Name of the Application field**, specify a unique name (e.g. Windows-<INITIALS>-1).
+
+Click **Create**.
+
+You will be taken directly to the **Applications** page to monitor the provisioning of your Blueprint.
+
+Select **Audit** to view the progress of your application. You’ll likely notice that the **Windows10_AHV - Check Login** takes some time to complete, as not only do we have to wait for the VM to power on, we have to wait for it to get Sysprepped with our Unattended XML file. Once the login task is complete, select the **JoinDomain** task to view the output of our domain join script.
+
+Note the status changes to **Running** after the Blueprint has been successfully provisioned.
+
+.. figure:: images/launch.png
+
++Verification+
+
+Once the application is in a **Running** state, click on the **Services** tab, then select the **Windows10** service. On the panel that opens to the right, copy the **Name** of the VM (it should be named something like Win-0-123456-789012). Next, paste the VM name in the Searching box at the very top of Prism Central and click **Enter**.
+
+.. figure:: images/window7.png
+
+Next, click **Launch Console**. You should now be able to access your Windows VM.
+
+.. figure:: images/window8.png
 
 Takeaways
 +++++++++
 
-- Calm provides the same application deployment and lifecycle management benefits for Windows workloads as it does for Linux workloads.
+In addition to Linux VM management with shell scripts, Nutanix Calm can natively manage Windows VMs via Powershell and Sysprep.
 
-- Calm can natively execute remote PowerShell scripts on Windows endpoints without the need for a Windows-based proxy.
+Although the labs have focused solely on either Linux or Windows, Calm also supports managing different OSes within the same blueprint. You can even manage VMs on different clouds, all within the same blueprint.
 
-Cleanup
-+++++++
-
-.. raw:: html
-
-  <strong><font color="red">Once your lab completion has been validated, PLEASE do your part to remove any unneeded VMs to ensure resources are available for all users on your shared cluster.</font></strong>
-
-If you do **NOT** intend to complete any of the *Optional* sections above, delete your application deployment in Calm.
-
-
-.. |projects| image:: images/projects.png
+Calm’s system defined Soft Delete action allows you to delete an application from Calm, without affecting the underlying VMs, which is useful for Jumpboxes and Developer workstations.
