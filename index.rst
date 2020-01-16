@@ -7,7 +7,6 @@
   :hidden:
 
   what_is_calm/what_is_calm
-  calm_windows_blueprint/calm_windows_blueprint
   calm_win/calm_win
 
 .. toctree::
@@ -66,19 +65,19 @@ Networking
 Hosted POC clusters follow a standard naming convention:
 
 - **Cluster Name** - POC\ *XYZ*
-- **Subnet** - 10.**21**.\ *XYZ*\ .0
-- **Cluster IP** - 10.**21**.\ *XYZ*\ .37
+- **Subnet** - 10.**41**.\ *XYZ*\ .0
+- **Cluster IP** - 10.**41**.\ *XYZ*\ .37
 
 If provisioned from the marketing pool:
 - **Cluster Name** - MKT\ *XYZ*
-- **Subnet** - 10.**20**.\ *XYZ*\ .0
-- **Cluster IP** - 10.**20**.\ *XYZ*\ .37
+- **Subnet** - 10.**41**.\ *XYZ*\ .0
+- **Cluster IP** - 10.**41**.\ *XYZ*\ .37
 
 For example:
 
 - **Cluster Name** - POC055
-- **Subnet** - 10.21.55.0
-- **Cluster IP** - 10.21.55.37
+- **Subnet** - 10.41.55.0
+- **Cluster IP** - 10.41.55.37
 
 Throughout the Workshop there are multiple instances where you will need to substitute *XYZ* with the correct octet for your subnet, for example:
 
@@ -88,31 +87,13 @@ Throughout the Workshop there are multiple instances where you will need to subs
 
    * - IP Address
      - Description
-   * - 10.21.\ *XYZ*\ .37
+   * - 10.41.\ *XYZ*\ .37
      - Nutanix Cluster Virtual IP
-   * - 10.21.\ *XYZ*\ .39
+   * - 10.41.\ *XYZ*\ .39
      - **PC** VM IP, Prism Central
-   * - 10.21.\ *XYZ*\ .40
+   * - 10.41.\ *XYZ*\ .40
      - **DC** VM IP, NTNXLAB.local Domain Controller
 
-Each cluster is configured with 2 VLANs which can be used for VMs:
-
-.. list-table::
-  :widths: 25 25 10 40
-  :header-rows: 1
-
-  * - Network Name
-    - Address
-    - VLAN
-    - DHCP Scope
-  * - Primary
-    - 10.21.\ *XYZ*\ .1/25
-    - 0
-    - 10.21.\ *XYZ*\ .50-10.21.\ *XYZ*\ .124
-  * - Secondary
-    - 10.21.\ *XYZ*\ .129/25
-    - *XYZ1*
-    - 10.21.\ *XYZ*\ .132-10.21.\ *XYZ*\ .253
 
 Credentials
 ...........
@@ -135,10 +116,10 @@ Credentials
      - admin
      - *<Cluster Password>*
    * - Controller VM
-     - nutanix
+     - nutanix/4u
      - *<Cluster Password>*
    * - Prism Central VM
-     - nutanix
+     - nutanix/4u
      - *<Cluster Password>*
 
 Each cluster has a dedicated domain controller VM, **DC**, responsible for providing AD services for the **NTNXLAB.local** domain. The domain is populated with the following Users and Groups:
@@ -180,22 +161,14 @@ Select HTML5 (web browser) OR Install the Parallels Client
 
 Select a desktop or application of your choice.
 
-Employee Pulse Secure VPN
+Pulse Secure VPN
 ..........................
 
 https://sslvpn.nutanix.com - Use your CORP credentials
 
-Non-Employee Pulse Secure VPN
+Pulse Secure VPN
 ..............................
 
-https://lab-vpn.nutanix.com - **Username:** POCxxx-User01 (up to POCxxx-User20), **Password:** *<Provided by Instructor>*
+https://xlv-uswest1.nutanix.com/ - **Username:** POCxxx-User01 (up to POCxxx-User20), **Password:** *customerSE/4u*
 
 Under **Client Application Sessions**, click **Start** to the right of **Pulse Secure** to download the client.
-
-Install and open **Pulse Secure**.
-
-Add a connection:
-
-- **Type** - Policy Secure (UAC) or Connection Server
-- **Name** - HPOC VPN
-- **Server URL** - lab-vpn.nutanix.com
