@@ -105,7 +105,6 @@ Creating the Blueprint
 
 
    .. note::
-
      Using the description value provided will create a hyperlink to the BugNET application to launch once deployment has completed.
 
 #. Click **Credentials** and create the following two credentials:
@@ -147,7 +146,7 @@ Variables improve the extensibility of Blueprints. For this Blueprint, we’ll w
 #. Click **Save**.
 
 Adding Windows Services
-+++++++++++++++++++++++
+-----------------------
 
 #. Navigate to **Virtual Infrastructure** click **Images**, click **Add Images**. Select **URL** as Image resource, fill out download address https://s3.amazonaws.com/get-ahv-images/Windows10-1709.qcow2 and click **Upload file** , **Next** and **Save**.
 
@@ -180,11 +179,11 @@ Adding Windows Services
       Install Type - **Prepared**
       **Script** - Paste in the following Unattended XML:
 
-      .. code-block:: XML
-        :caption: Sysprep Script
+  .. code-block:: XML
+    :caption: Sysprep Script
 
         <?xml version="1.0" encoding="UTF-8"?>
-  <unattend xmlns="urn:schemas-microsoft-com:unattend">
+     <unattend xmlns="urn:schemas-microsoft-com:unattend">
      <settings pass="specialize">
         <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
            <ComputerName>Win-@@{calm_unique}@@</ComputerName>
@@ -264,7 +263,7 @@ Adding Windows Services
 
   .. figure:: images/Guest.png
 
-Select :fa:`plus-circle` under **Network Adapters(NICs)**
+Select : fa:`plus-circle` under **Network Adapters(NICs)**
 
 Select **primary**
 
@@ -297,59 +296,59 @@ Copy and paste the following script into the **Script** field:
 
 .. code-block:: powershell
 
-$HOSTNAME = "Win-@@{calm_unique}@@"
+   $HOSTNAME = "Win-@@{calm_unique}@@"
 
-function Set-Hostname{
-  [CmdletBinding()]
-  Param(
-      [parameter(Mandatory=$true)]
-      [string]$Hostname
-)
-  if ($Hostname -eq  $(hostname)){
-    Write-Host "Hostname already set."
-  } else{
-    Rename-Computer -NewName $HOSTNAME -ErrorAction Stop
-  }
-}
+   function Set-Hostname{
+     [CmdletBinding()]
+     Param(
+         [parameter(Mandatory=$true)]
+         [string]$Hostname
+   )
+     if ($Hostname -eq  $(hostname)){
+       Write-Host "Hostname already set."
+     } else{
+       Rename-Computer -NewName $HOSTNAME -ErrorAction Stop
+     }
+   }
 
-function JointoDomain {
-  [CmdletBinding()]
-  Param(
-      [parameter(Mandatory=$true)]
-      [string]$DomainName,
-      [parameter(Mandatory=$false)]
-      [string]$OU,
-      [parameter(Mandatory=$true)]
-      [string]$Username,
-      [parameter(Mandatory=$true)]
-      [string]$Password,
-      [parameter(Mandatory=$true)]
-      [string]$Server
-  )
-  $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
-  $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
+   function JointoDomain {
+     [CmdletBinding()]
+     Param(
+         [parameter(Mandatory=$true)]
+         [string]$DomainName,
+         [parameter(Mandatory=$false)]
+         [string]$OU,
+         [parameter(Mandatory=$true)]
+         [string]$Username,
+         [parameter(Mandatory=$true)]
+         [string]$Password,
+         [parameter(Mandatory=$true)]
+         [string]$Server
+     )
+     $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
+     $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
 
-  if ($env:computername  -eq $env:userdomain) {
-    Write-Host "Not in domain"
-    $adminname = "$DomainName\$Username"
-    $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
-    Write-Host "$adminname , $password"
-    $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
-    Add-computer -DomainName $DomainName -Credential $credential -force -Options JoinWithNewName,AccountCreate -PassThru -ErrorAction Stop
-  } else {
-     Write-Host "Already in domain"
-  }
-}
+     if ($env:computername  -eq $env:userdomain) {
+       Write-Host "Not in domain"
+       $adminname = "$DomainName\$Username"
+       $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
+       Write-Host "$adminname , $password"
+       $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
+       Add-computer -DomainName $DomainName -Credential $credential -force -Options JoinWithNewName,AccountCreate -PassThru -ErrorAction Stop
+     } else {
+        Write-Host "Already in domain"
+     }
+   }
 
-if ($HOSTNAME -ne $Null){
-  Write-Host "Setting Hostname"
-  Set-Hostname -Hostname $HOSTNAME
-}
+   if ($HOSTNAME -ne $Null){
+     Write-Host "Setting Hostname"
+     Set-Hostname -Hostname $HOSTNAME
+   }
 
-JointoDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@" -Server "@@{AD_IP}@@"
+   JointoDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@" -Server "@@{AD_IP}@@"
 
-Restart-Computer -Force -AsJob
-exit 0
+   Restart-Computer -Force -AsJob
+   exit 0
 
  .. Note::
    Looking at the script you can see a function that sets the VM’s hostname if it is not already set, a function that joins the computer to the domain specified via our macro and credentials that we set earlier, and finally restarts the user VM so the domain join takes affect.
@@ -370,32 +369,32 @@ exit 0
 
     .. code-block:: powershell
 
-    $HOSTNAME = "Win-@@{calm_unique}@@"
+       $HOSTNAME = "Win-@@{calm_unique}@@"
 
-function RemoveFromDomain {
-  [CmdletBinding()]
-  Param(
-      [parameter(Mandatory=$true)]
-      [string]$DomainName,
-      [parameter(Mandatory=$false)]
-      [string]$OU,
-      [parameter(Mandatory=$true)]
-      [string]$Username,
-      [parameter(Mandatory=$true)]
-      [string]$Password,
-  )
-  $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
-  $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
+      function RemoveFromDomain {
+        [CmdletBinding()]
+        Param(
+            [parameter(Mandatory=$true)]
+            [string]$DomainName,
+            [parameter(Mandatory=$false)]
+            [string]$OU,
+            [parameter(Mandatory=$true)]
+            [string]$Username,
+            [parameter(Mandatory=$true)]
+            [string]$Password,
+        )
+        $adapter = Get-NetAdapter | ? {$_.Status -eq "up"}
+        $adapter | Set-DnsClientServerAddress -ServerAddresses $Server
 
-  $adminname = "$DomainName\$Username"
-  $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
-  Write-Host "$adminname , $password"
-  $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
-  Remove-computer -UnjoinDomaincredential $credential -PassThru -Verbose -Force
-  Write-Host "Removed from domain @@{DOMAIN}@@"
-}
+        $adminname = "$DomainName\$Username"
+        $adminpassword = ConvertTo-SecureString -asPlainText -Force -String "$Password"
+        Write-Host "$adminname , $password"
+        $credential = New-Object System.Management.Automation.PSCredential($adminname,$adminpassword)
+        Remove-computer -UnjoinDomaincredential $credential -PassThru -Verbose -Force
+        Write-Host "Removed from domain @@{DOMAIN}@@"
+      }
 
-RemoveFromDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@"
+      RemoveFromDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@"
 
  .. Note::
    This script contains a function which removes the computer from the domain, utilizing the DOMAIN_CRED credentials that we defined earlier.
@@ -425,11 +424,11 @@ Note the status changes to **Running** after the Blueprint has been successfully
 
 Once the application is in a **Running** state, click on the **Services** tab, then select the **Windows10** service. On the panel that opens to the right, copy the **Name** of the VM (it should be named something like Win-0-123456-789012). Next, paste the VM name in the Searching box at the very top of Prism Central and click **Enter**.
 
-.. figure:: images/window7.png
+.. figure:: images/windows7.png
 
 Next, click **Launch Console**. You should now be able to access your Windows VM.
 
-.. figure:: images/window8.png
+.. figure:: images/windows8.png
 
 Takeaways
 +++++++++
