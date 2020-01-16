@@ -1,4 +1,4 @@
-.. title:: Nutanix .Next Calm Linux HOL
+.. title:: CALM Windows Workshop
 
 
 .. toctree::
@@ -91,6 +91,10 @@ Projects are the logical construct that integrate Calm with Nutanix's native Sel
 
 Creating the Blueprint
 ++++++++++++++++++++++
+#. Select blueprints **Blueprints** in the left hand toolbar to view and manage Calm bleuprints.
+
+.. note::
+  Mousing over an icon will display its title.
 
 #. Within Calm, create a new **Multi VM/Pod Blueprint**.
 
