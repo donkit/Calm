@@ -101,13 +101,15 @@ Creating the Blueprint
 
 #. Specify **Windows-<INITIALS>** in the Blueprint **Name** field. Enter a Description **Win10 added to AD**
 
-#. Select *initals*-Calm from the Project drop down menu and click Proceed.
+#. Select ***initals*-Calm** from the Project drop down menu and click **Proceed**.
 
 
    .. note::
      Using the description value provided will create a hyperlink to the BugNET application to launch once deployment has completed.
 
 #. Click **Credentials** and create the following two credentials:
+
+.. figure:: images/cred.png
 
 .. Note::
   You’ll likely notice that both credentials have the same username and password. For this reason, we technically could use a single credential. However, in the real world it is extremely unlikely (and unwise) that both your User VMs and your Domain credentials are the exact same. For that reason, we’ll leave them seperate to make this Blueprint more portable.
@@ -136,10 +138,10 @@ Variables improve the extensibility of Blueprints. For this Blueprint, we’ll w
    +-------------------+----------------+
    | **Variable Name** |  **Value**     |
    +===================+================+
-   | Domain Name       |  ntnxlab.local |
-   +----------------+-------------------+
-   | AD_IP             |  (10.42.xx.51) |
-   +-------------------+----------------+--
+   | DOMAIN            |  ntnxlab.local |
+   +-------------------+----------------+
+   | AD_IP             |  10.42.xx.51   |
+   +-------------------+----------------+
 
    .. figure:: images/windows2.png
 
@@ -149,6 +151,8 @@ Adding Windows Services
 -----------------------
 
 #. Navigate to **Virtual Infrastructure** click **Images**, click **Add Images**. Select **URL** as Image resource, fill out download address https://s3.amazonaws.com/get-ahv-images/Windows10-1709.qcow2 and click **Upload file** , **Next** and **Save**.
+
+   .. figure:: images/image.png
 
    .. figure:: images/windows3.png
 
@@ -162,18 +166,15 @@ Adding Windows Services
 
   Fill out the following fields on the right side:
 
-      **Service Name** - Windows10
-      **Name** - Windows10_AHV
-      **Cloud** - Nutanix
-      **OS** - Windows
-      **VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
-      **Image** - Windows10
-      **Type** - Disk
-      **Bus Type** - SCSI
-      Select **Bootable**
-      **vCPUs** - 2
-      **Cores per vCPU** - 1
-      **Memory (GiB)** - 4
+      #.**Service Name** - Windows10
+      #.**Name** - Windows10_AHV
+      #.**Cloud** - Nutanix
+      #.**OS** - Windows
+      #.**VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
+      #.**vCPUs** - 2
+      #.**Cores per vCPU** - 1
+      #.**Memory (GiB)** - 4
+
       Select **Guest Customization**
       Type - **Sysprep**
       Install Type - **Prepared**
@@ -263,9 +264,16 @@ Adding Windows Services
 
   .. figure:: images/Guest.png
 
-Select : fa:`plus-circle` under **Network Adapters(NICs)**
+  Disk (1)
 
-Select **primary**
+  #.**Type** - Disk
+  #.**Bus Type** - SCSI
+  #.**Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
+  #.Select **Bootable**
+
+Select :fa:`plus-circle` under **Network Adapters(NICs)**
+
+Select **Primary**
 
 **Credential** -  Select WIN_VM_CRED and leave the rest of the fields as default
 
@@ -273,9 +281,13 @@ Select **primary**
 
 Click **Save** and ensure no errors or warnings pop-up. If they do, resolve the issue, and **Save** again.
 
-*Package Install*
+
+Package Install
+---------------
 
 With the Windows10 service icon selected in the workspace window, scroll to the top of the **Configuration Panel**, click **Package**. Name the Package as **WIN_PACKAGE**, and then click the **Configure install** button.
+
+.. figure:: images/PackageInstall.png
 
 On the Blueprint Canvas section, a **Package Install** field will pop up next to the Windows10 Service tile:
 
@@ -285,12 +297,12 @@ Click on the + Task button, and fill out the following fields on the Configurati
 
 Click on the + **Task** button, and fill out the following fields on the **Configuration Panel** on the right:
 
-**Name Task** - JoinDomain
-**Type** - execute
-**Script Type** - Powershell
-**Credential - WIN_VM_CRED
+  #.**Task Name** - JoinDomain
+  #.**Type** - execute
+  #.**Script Type** - Powershell
+  #.**Credential - WIN_VM_CRED
 
-.. figure:: images/package.png
+.. figure:: images/joindomain.png
 
 Copy and paste the following script into the **Script** field:
 
@@ -350,22 +362,30 @@ Copy and paste the following script into the **Script** field:
    Restart-Computer -Force -AsJob
    exit 0
 
+
+#.Click **Save**
+
  .. Note::
    Looking at the script you can see a function that sets the VM’s hostname if it is not already set, a function that joins the computer to the domain specified via our macro and credentials that we set earlier, and finally restarts the user VM so the domain join takes affect.
 
-*Package Uninstall*
+Click on the Windows10_AHV
+
+.. figure:: images/window10.png
+
+Package Uninstall
+-----------------
 
 .. figure:: images/package.png
 
 
-    **Click** - Configure Uninstall
-    **Click** - + Task
-    **Name Task** - RemoveDomain
-    Type - **Execute**
-    Script Type - **Powershell**
-    **Credential** - WIN_VM_CRED
+    #.**Click** - Configure Uninstall
+    #.**Click** - + Task
+    #.**Name Task** - RemoveDomain
+    #.Type - **Execute**
+    #.Script Type - **Powershell**
+    #.**Credential** - WIN_VM_CRED
 
-    Copy and paste the following script into the **Script** field:
+Copy and paste the following script into the **Script** field:
 
     .. code-block:: powershell
 
@@ -396,6 +416,7 @@ Copy and paste the following script into the **Script** field:
 
       RemoveFromDomain -DomainName "@@{DOMAIN}@@" -Username "@@{DOMAIN_CRED.username}@@" -Password "@@{DOMAIN_CRED.secret}@@"
 
+
  .. Note::
    This script contains a function which removes the computer from the domain, utilizing the DOMAIN_CRED credentials that we defined earlier.
 
@@ -404,8 +425,8 @@ Click **Save**. You will be prompted with specific errors if there are validatio
 Blueprint Launch and Verification
 +++++++++++++++++++++++++++++++++
 
-+Launching the Blueprint+
-
+Launching the Blueprint
+-----------------------
 From the toolbar at the top of the Blueprint Editor, click **Launch**.
 
 In the **Name of the Application field**, specify a unique name (e.g. Windows-<INITIALS>-1).
