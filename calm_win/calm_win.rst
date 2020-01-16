@@ -124,26 +124,9 @@ Creating the Blueprint
 
 #. Click **Save** and return **Back** to the Blueprint Editor.
 
-#. Click **Configuration** and create the following **Downloadable Image Configuration**:
-
-   - **Package Name** - MSSQL2014_ISO
-   - **Description** - Microsoft SQL 2014 Installation ISO
-   - **Image Name** - MSSQL2014.iso
-   - **Image Type** - ISO Image
-   - **Architecture** - X86_64
-   - **Source URI** - http://download.microsoft.com/download/7/9/F/79F4584A-A957-436B-8534-3397F33790A6/SQLServer2014SP3-FullSlipstream-x64-ENU.iso
-   - **Product Name** - MSSQL
-   - **Product Version** - 2014
-   - **Checksum Algorithm** - *Leave blank*
-   - **Checksum Value** - *Leave blank*
-
-   .. figure:: images/downloadable_image_config.png
-
-#. Click **Save** and return back to the Blueprint Editor.
-
 #. Using the **Default** Application Profile, specify the following **Variables** in the **Configuration Panel**:
 
-   +-------------------+---------------------+---------------------+--------------------------+
+   +----------------+----------------+------------------+------------------+------------------+
    | **Name**       |**Data Type**   | **Value**        | **Secret**       | **Runtime**      |
    +=====================+=====================+=====================+========================+
    | DbName         | String         | BugNET           | No               | Yes              |
