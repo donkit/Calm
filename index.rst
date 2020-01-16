@@ -10,7 +10,7 @@
   calm_win/calm_win
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 3
   :caption: Appendix
   :name: _appendix
   :hidden:
@@ -62,22 +62,42 @@ Nutanix Workshops are intended to be run in the Nutanix Hosted POC environment. 
 Networking
 ..........
 
+Access Instructions
++++++++++++++++++++
+
+The Nutanix Hosted POC environment can be accessed a number of different ways:
+
+Please use install a VPN client (faster) to connect to the remote lab in US. https://xlv-uswest1.nutanix.com/
+
+Or, using a HTML5 VDI (slower) to connect to the remote lab in US. https://xld-uswest1.nutanix.com/
+
+You should have one page of lab access info. If you don’t, please seek help from your instructor.
+
+If you have any questions, please feel free to ask.
+
+..............................
+
+**Username:** POCxxx-User01 (up to POCxxx-User20), **Password:** *customerSE/4u*
+
+Under **Client Application Sessions**, click **Start** to the right of **Pulse Secure** to download the client.
+
+
 Hosted POC clusters follow a standard naming convention:
 
 - **Cluster Name** - POC\ *XYZ*
-- **Subnet** - 10.**41**.\ *XYZ*\ .0
-- **Cluster IP** - 10.**41**.\ *XYZ*\ .37
+- **Subnet** - 10.42.**.\ *XYZ*\ .0
+- **Cluster IP** - 10.42.**.\ *XYZ*\ .37
 
 If provisioned from the marketing pool:
 - **Cluster Name** - MKT\ *XYZ*
-- **Subnet** - 10.**41**.\ *XYZ*\ .0
-- **Cluster IP** - 10.**41**.\ *XYZ*\ .37
+- **Subnet** - 10.41.**.\ *XYZ*\ .0
+- **Cluster IP** - 10.41.**.\ *XYZ*\ .37
 
 For example:
 
 - **Cluster Name** - POC055
-- **Subnet** - 10.41.55.0
-- **Cluster IP** - 10.41.55.37
+- **Subnet** - 10.42.50.0
+- **Cluster IP** - 10.42.50.37
 
 Throughout the Workshop there are multiple instances where you will need to substitute *XYZ* with the correct octet for your subnet, for example:
 
@@ -87,11 +107,11 @@ Throughout the Workshop there are multiple instances where you will need to subs
 
    * - IP Address
      - Description
-   * - 10.41.\ *XYZ*\ .37
+   * - 10.42.**.37
      - Nutanix Cluster Virtual IP
-   * - 10.41.\ *XYZ*\ .39
+   * - 10.42.**.39
      - **PC** VM IP, Prism Central
-   * - 10.41.\ *XYZ*\ .40
+   * - 10.42.**.51
      - **DC** VM IP, NTNXLAB.local Domain Controller
 
 
@@ -111,64 +131,7 @@ Credentials
      - Password
    * - Prism Element
      - admin
-     - *<Cluster Password>*
+     - customerSE/4u
    * - Prism Central
      - admin
-     - *<Cluster Password>*
-   * - Controller VM
-     - nutanix/4u
-     - *<Cluster Password>*
-   * - Prism Central VM
-     - nutanix/4u
-     - *<Cluster Password>*
-
-Each cluster has a dedicated domain controller VM, **DC**, responsible for providing AD services for the **NTNXLAB.local** domain. The domain is populated with the following Users and Groups:
-
-.. list-table::
-   :widths: 25 35 40
-   :header-rows: 1
-
-   * - Group
-     - Username(s)
-     - Password
-   * - Administrators
-     - Administrator
-     - nutanix/4u
-   * - SSP Admins
-     - adminuser01-adminuser25
-     - nutanix/4u
-   * - SSP Developers
-     - devuser01-devuser25
-     - nutanix/4u
-   * - SSP Power Users
-     - poweruser01-poweruser25
-     - nutanix/4u
-   * - SSP Basic Users
-     - basicuser01-basicuser25
-     - nutanix/4u
-
-Access Instructions
-+++++++++++++++++++
-
-The Nutanix Hosted POC environment can be accessed a number of different ways:
-
-Parallels VDI
-.............
-
-Login to https://xld-uswest1.nutanix.com (for PHX) or https://xld-useast1.nutanix.com (for RTP) using your supplied credentials
-
-Select HTML5 (web browser) OR Install the Parallels Client
-
-Select a desktop or application of your choice.
-
-Pulse Secure VPN
-..........................
-
-https://sslvpn.nutanix.com - Use your CORP credentials
-
-Pulse Secure VPN
-..............................
-
-https://xlv-uswest1.nutanix.com/ - **Username:** POCxxx-User01 (up to POCxxx-User20), **Password:** *customerSE/4u*
-
-Under **Client Application Sessions**, click **Start** to the right of **Pulse Secure** to download the client.
+     - customerSE/4u
