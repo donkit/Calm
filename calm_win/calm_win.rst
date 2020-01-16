@@ -420,7 +420,8 @@ Note the status changes to **Running** after the Blueprint has been successfully
 
 .. figure:: images/launch.png
 
-+Verification+
+Verification
+------------
 
 Once the application is in a **Running** state, click on the **Services** tab, then select the **Windows10** service. On the panel that opens to the right, copy the **Name** of the VM (it should be named something like Win-0-123456-789012). Next, paste the VM name in the Searching box at the very top of Prism Central and click **Enter**.
 
