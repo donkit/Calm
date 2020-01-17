@@ -111,13 +111,13 @@ Creating the Blueprint
   You’ll likely notice that both credentials have the same username and password. For this reason, we technically could use a single credential. However, in the real world it is extremely unlikely (and unwise) that both your User VMs and your Domain credentials are the exact same. For that reason, we’ll leave them seperate to make this Blueprint more portable.
 
    +---------------------+---------------------+---------------------+
-   | **Credential Name** | WIN_VM_CRED         | DOMAIN_CRED            |
+   | **Credential Name** | WIN_VM_CRED         | DOMAIN_CRED         |
    +---------------------+---------------------+---------------------+
    | **Username**        | Administrator       | Administrator       |
    +---------------------+---------------------+---------------------+
    | **Secret Type**     | Password            | Password            |
    +---------------------+---------------------+---------------------+
-   | **Password**        | nutanix/4u          | nutanix/4u      |
+   | **Password**        | nutanix/4u          | nutanix/4u          |
    +---------------------+---------------------+---------------------+
 
    .. figure:: images/windows1.png
@@ -148,10 +148,7 @@ Adding Windows Image
 
 #. Navigate to **Virtual Infrastructure** click **Images**, click **Add Images**. Select **URL** as Image resource, fill out download address https://s3.amazonaws.com/get-ahv-images/Windows10-1709.qcow2 and click **Upload file** , **Next** and **Save**.
 
-   .. figure:: images/Virtual.png
-
-
-   .. figure:: images/windows3.png
+      .. figure:: images/windows3.png
 
 #. After uploading successfully, go back to Calm page and select **Blueprints** from the sidebar and click your **Windows-<INITIALS>** Blueprint to open the Blueprint Editor.
 
@@ -163,14 +160,14 @@ Adding Windows Image
 
   Fill out the following fields on the right side:
 
-      #.**Service Name** - Windows10
-      #.**Name** - Windows10_AHV
-      #.**Cloud** - Nutanix
-      #.**OS** - Windows
-      #.**VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
-      #.**vCPUs** - 2
-      #.**Cores per vCPU** - 1
-      #.**Memory (GiB)** - 4
+#. **Service Name** - Windows10
+#. **Name** - Windows10_AHV
+#. **Cloud** - Nutanix
+#. **OS** - Windows
+#. **VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
+#. **vCPUs** - 2
+#. **Cores per vCPU** - 1
+#. **Memory (GiB)** - 4
 
       Select **Guest Customization**
       Type - **Sysprep**
@@ -180,7 +177,7 @@ Adding Windows Image
   .. code-block:: XML
     :caption: Sysprep Script
 
-   <?xml version="1.0" encoding="UTF-8"?>
+     <?xml version="1.0" encoding="UTF-8"?>
      <unattend xmlns="urn:schemas-microsoft-com:unattend">
      <settings pass="specialize">
         <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -262,12 +259,12 @@ Adding Windows Image
 
   .. figure:: images/Guest.png
 
-  **Disk (1)**
+**Disk (1)**
 
-  #.**Type** - Disk
-  #.**Bus Type** - SCSI
-  #.**Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
-  #.Select **Bootable**
+#. **Type** - Disk
+#. **Bus Type** - SCSI
+#. **Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
+#. Select **Bootable**
 
 Select : fa:`plus-circle` under **Network Adapters(NICs)**
 
@@ -295,12 +292,12 @@ Click on the + Task button, and fill out the following fields on the Configurati
 
 Click on the + **Task** button, and fill out the following fields on the **Configuration Panel** on the right:
 
-  #.**Task Name** - JoinDomain
-  #.**Type** - execute
-  #.**Script Type** - Powershell
-  #.**Credential - WIN_VM_CRED
+#. **Task Name** - JoinDomain
+#. **Type** - execute
+#. **Script Type** - Powershell
+#. **Credential - WIN_VM_CRED
 
-.. figure:: images/joindomain.png
+  .. figure:: images/joindomain.png
 
 Copy and paste the following script into the **Script** field:
 
@@ -361,27 +358,28 @@ Copy and paste the following script into the **Script** field:
    exit 0
 
 
-#.Click **Save**
+
+Click **Save**
 
  .. Note::
    Looking at the script you can see a function that sets the VM’s hostname if it is not already set, a function that joins the computer to the domain specified via our macro and credentials that we set earlier, and finally restarts the user VM so the domain join takes affect.
 
 Click on the Windows10_AHV
 
-.. figure:: images/window10.png
+  .. figure:: images/window10.png
 
 Package Uninstall
 -----------------
 
-.. figure:: images/package.png
+  .. figure:: images/package.png
 
 
-    #.**Click** - Configure Uninstall
-    #.**Click** - + Task
-    #.**Name Task** - RemoveDomain
-    #.Type - **Execute**
-    #.Script Type - **Powershell**
-    #.**Credential** - WIN_VM_CRED
+#. **Click** - Configure Uninstall
+#. **Click** - + Task
+#. **Name Task** - RemoveDomain
+#. Type - **Execute**
+#. Script Type - **Powershell**
+#. **Credential** - WIN_VM_CRED
 
 Copy and paste the following script into the **Script** field:
 
