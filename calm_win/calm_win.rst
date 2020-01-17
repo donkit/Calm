@@ -103,10 +103,6 @@ Creating the Blueprint
 
 #. Select ***initals*-Calm** from the Project drop down menu and click **Proceed**.
 
-
-   .. note::
-     Using the description value provided will create a hyperlink to the BugNET application to launch once deployment has completed.
-
 #. Click **Credentials** and create the following two credentials:
 
 .. figure:: images/cred.png
