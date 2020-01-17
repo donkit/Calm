@@ -31,7 +31,6 @@ Verifying the Default Project
 #. Click |projects| **Projects** in the left hand toolbar and select the **default** project.
 
    .. note::
-
      Mousing over an icon will display its title.
 
 Creating A Project
@@ -87,7 +86,6 @@ Projects are the logical construct that integrate Calm with Nutanix's native Sel
 #. Click **Save**.
 
 .. note::
-
   Click `here <https://portal.nutanix.com/#/page/docs/details?targetId=Nutanix-Calm-Admin-Operations-Guide-v56:nuc-roles-responsibility-matrix-c.html>`_ to view the complete matrix of default SSP roles and associated permissions.
 
 Creating the Blueprint
@@ -160,14 +158,14 @@ Adding Windows Image
 
   Fill out the following fields on the right side:
 
-#. **Service Name** - Windows10
-#. **Name** - Windows10_AHV
-#. **Cloud** - Nutanix
-#. **OS** - Windows
-#. **VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
-#. **vCPUs** - 2
-#. **Cores per vCPU** - 1
-#. **Memory (GiB)** - 4
+ - **Service Name** - Windows10
+ - **Name** - Windows10_AHV
+ - **Cloud** - Nutanix
+ - **OS** - Windows
+ - **VM Name** - Win-@@{calm_array_index}@@-@@{calm_time}@@
+ - **vCPUs** - 2
+ - **Cores per vCPU** - 1
+ - **Memory (GiB)** - 4
 
       Select **Guest Customization**
       Type - **Sysprep**
@@ -261,10 +259,10 @@ Adding Windows Image
 
 **Disk (1)**
 
-#. **Type** - Disk
-#. **Bus Type** - SCSI
-#. **Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
-#. Select **Bootable**
+ - **Type** - Disk
+ - **Bus Type** - SCSI
+ - **Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
+ - Select **Bootable**
 
 Select : fa:`plus-circle` under **Network Adapters(NICs)**
 
