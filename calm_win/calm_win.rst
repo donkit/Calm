@@ -280,8 +280,6 @@ Package Install
 
 With the Windows10 service icon selected in the workspace window, scroll to the top of the **Configuration Panel**, click **Package**. Name the Package as **WIN_PACKAGE**, and then click the **Configure install** button.
 
-  .. figure:: images/packageInstall.png
-
 On the Blueprint Canvas section, a **Package Install** field will pop up next to the Windows10 Service tile:
 
 Click on the + Task button, and fill out the following fields on the Configuration Panel on the right:
