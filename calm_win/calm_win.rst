@@ -147,18 +147,19 @@ Variables improve the extensibility of Blueprints. For this Blueprint, we’ll w
 
 #. Click **Save**.
 
-Adding Windows Services
+Adding Windows Image
 -----------------------
 
 #. Navigate to **Virtual Infrastructure** click **Images**, click **Add Images**. Select **URL** as Image resource, fill out download address https://s3.amazonaws.com/get-ahv-images/Windows10-1709.qcow2 and click **Upload file** , **Next** and **Save**.
 
-   .. figure:: images/image.png
+   .. figure:: images/Virtual.png
+
 
    .. figure:: images/windows3.png
 
 #. After uploading successfully, go back to Calm page and select **Blueprints** from the sidebar and click your **Windows-<INITIALS>** Blueprint to open the Blueprint Editor.
 
-#. In **Application Overview** > **Services**, click :fa:`plus-circle`
+#. In **Application Overview** > **Services**, click : fa:`plus-circle`
 
 #. Note that **Service1** appears in the **Workspace** and the **Configuration Pane** reflects the configuration of the selected Service.
 
@@ -183,7 +184,7 @@ Adding Windows Services
   .. code-block:: XML
     :caption: Sysprep Script
 
-        <?xml version="1.0" encoding="UTF-8"?>
+   <?xml version="1.0" encoding="UTF-8"?>
      <unattend xmlns="urn:schemas-microsoft-com:unattend">
      <settings pass="specialize">
         <component xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -259,25 +260,26 @@ Adding Windows Services
      </settings>
   </unattend>
 
-.. note::
+
+  .. note::
   This Unattended XML answer file will set some basic computer information such as hostname and organization, configure the Administrator password to our WIN_VM_CRED secret, open Powershell port 5985 in the firewall, and enable remote Powershell functionality.
 
   .. figure:: images/Guest.png
 
-  Disk (1)
+  **Disk (1)**
 
   #.**Type** - Disk
   #.**Bus Type** - SCSI
   #.**Operation** - Clone from image Service, Select **Image** Window10-1709.qcow2
   #.Select **Bootable**
 
-Select :fa:`plus-circle` under **Network Adapters(NICs)**
+Select : fa:`plus-circle` under **Network Adapters(NICs)**
 
 Select **Primary**
 
 **Credential** -  Select WIN_VM_CRED and leave the rest of the fields as default
 
-  .. figure:: images/credential.png
+  .. figure:: images/Credential.png
 
 Click **Save** and ensure no errors or warnings pop-up. If they do, resolve the issue, and **Save** again.
 
@@ -287,13 +289,13 @@ Package Install
 
 With the Windows10 service icon selected in the workspace window, scroll to the top of the **Configuration Panel**, click **Package**. Name the Package as **WIN_PACKAGE**, and then click the **Configure install** button.
 
-.. figure:: images/PackageInstall.png
+  .. figure:: images/packageInstall.png
 
 On the Blueprint Canvas section, a **Package Install** field will pop up next to the Windows10 Service tile:
 
 Click on the + Task button, and fill out the following fields on the Configuration Panel on the right:
 
-.. figure:: images/package.png
+  .. figure:: images/package.png
 
 Click on the + **Task** button, and fill out the following fields on the **Configuration Panel** on the right:
 
@@ -435,7 +437,7 @@ Click **Create**.
 
 You will be taken directly to the **Applications** page to monitor the provisioning of your Blueprint.
 
-Select **Audit** to view the progress of your application. You’ll likely notice that the **Windows10_AHV - Check Login** takes some time to complete, as not only do we have to wait for the VM to power on, we have to wait for it to get Sysprepped with our Unattended XML file. Once the login task is complete, select the **JoinDomain** task to view the output of our domain join script.
+Select **Audit** and expand the **Create** to view the progress of your application. You’ll likely notice that the **Windows10_AHV - Check Login** takes some time to complete, as not only do we have to wait for the VM to power on, we have to wait for it to get Sysprepped with our Unattended XML file. Once the login task is complete, select the **JoinDomain** task to view the output of our domain join script.
 
 Note the status changes to **Running** after the Blueprint has been successfully provisioned.
 
