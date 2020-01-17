@@ -150,7 +150,7 @@ Adding Windows Image
 
 #. After uploading successfully, go back to Calm page and select **Blueprints** from the sidebar and click your **Windows-<INITIALS>** Blueprint to open the Blueprint Editor.
 
-#. In **Application Overview** > **Services**, click : fa:`plus-circle`
+#. In **Application Overview** > **Services**, click :fa:`plus-circle` once to add two new Services.
 
 #. Note that **Service1** appears in the **Workspace** and the **Configuration Pane** reflects the configuration of the selected Service.
 
@@ -249,7 +249,7 @@ Adding Windows Image
            <UserLocale>en-US</UserLocale>
         </component>
      </settings>
-  </unattend>
+    </unattend>
 
 
   .. note::
@@ -294,8 +294,6 @@ Click on the + **Task** button, and fill out the following fields on the **Confi
 #. **Type** - execute
 #. **Script Type** - Powershell
 #. **Credential - WIN_VM_CRED
-
-  .. figure:: images/joindomain.png
 
 Copy and paste the following script into the **Script** field:
 
@@ -364,10 +362,11 @@ Click **Save**
 
 Click on the Windows10_AHV
 
-  .. figure:: images/window10.png
+
 
 Package Uninstall
 -----------------
+Click the **Window10** icon
 
   .. figure:: images/package.png
 
@@ -381,9 +380,9 @@ Package Uninstall
 
 Copy and paste the following script into the **Script** field:
 
-    .. code-block:: powershell
+  .. code-block:: powershell
 
-       $HOSTNAME = "Win-@@{calm_unique}@@"
+      $HOSTNAME = "Win-@@{calm_unique}@@"
 
       function RemoveFromDomain {
         [CmdletBinding()]
