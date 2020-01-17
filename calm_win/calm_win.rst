@@ -360,9 +360,6 @@ Click **Save**
  .. Note::
    Looking at the script you can see a function that sets the VM’s hostname if it is not already set, a function that joins the computer to the domain specified via our macro and credentials that we set earlier, and finally restarts the user VM so the domain join takes affect.
 
-Click on the Windows10_AHV
-
-
 
 Package Uninstall
 -----------------
