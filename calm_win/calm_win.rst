@@ -167,10 +167,10 @@ Adding Windows Image
  - **Cores per vCPU** - 1
  - **Memory (GiB)** - 4
 
-      Select **Guest Customization**
-      Type - **Sysprep**
-      Install Type - **Prepared**
-      **Script** - Paste in the following Unattended XML:
+      - Select **Guest Customization**
+      - Type - **Sysprep**
+      - Install Type - **Prepared**
+      - **Script** - Paste in the following Unattended XML:
 
   .. code-block:: XML
     :caption: Sysprep Script
